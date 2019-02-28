@@ -11,6 +11,7 @@ types:
 /index:
   /status:
     get:
+      description: Verify is the service is available.
       responses:
         200:
           body:
@@ -32,15 +33,13 @@ types:
               type: searchSchema
               example: !include searchExample.json
   /artifact:
-    get:
-      queryParameters:
-        id:
-          type: number
-      responses:
-        200:
-          body:
-            application/json:
-              ##type: !include artifactSchema.schema
-              example: !include artifactExample.json
+    /{id}:
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                ##type: !include artifactSchema.schema
+                example: !include artifactExample.json
           
   
