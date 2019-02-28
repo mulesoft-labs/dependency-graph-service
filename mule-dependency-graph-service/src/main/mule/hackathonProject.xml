@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+<mule xmlns:mmi="http://www.mulesoft.org/schema/mule/mmi" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/mmi http://www.mulesoft.org/schema/mule/mmi/current/mule-mmi.xsd">
     <http:listener-config name="hackathonProject-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
     <apikit:config name="hackathonProject-config" api="api/hackathonProject.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <flow name="hackathonProject-main">
+    <mmi:config name="Mule_Maven_Indexer_Config" doc:name="Mule Maven Indexer Config" doc:id="98108d06-53e6-4490-b4f8-6430438199ce" workingDirectory="/tmp/prueba1" >
+		<mmi:remote-repository id="mulesoft-public" url="https://repository.mulesoft.org/nexus/content/repositories/public" />
+	</mmi:config>
+	<flow name="hackathonProject-main">
         <http:listener config-ref="hackathonProject-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers>#[vars.outboundHeaders default {}]</http:headers>
@@ -124,35 +128,7 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\index\search:hackathonProject-config">
-        <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:id="15cfef5f-dabf-4f2a-b754-c2c440016877">
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  objects: [
-    {
-      package: {
-        name: "org.mule.runtime:mule-api",
-        version: "1.1.0",
-        description: "ar - Read Unix archive files.",
-        date: "2013-12-19T02:43:12.950Z"
-      }
-    }, 
-    {
-      package: {
-        name: "org.mule.runtime:tooling-client",
-        version: "1.0.0",
-        description: "ar - Read Unix archive files.",
-        date: "2013-12-19T02:43:12.950Z"
-      }
-    }
-  ],
-  total: 2,
-  time: "Thu Feb 28 2019 17:03:26 GMT+0000 (UTC)"
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
+		<mmi:search doc:name="Search" doc:id="64647088-0e6a-420a-bd16-6518eec18318" config-ref="Mule_Maven_Indexer_Config" artifactId="#[attributes.queryParams.text]"/>
     </flow>
     <flow name="get:\index\status:hackathonProject-config">
         <logger level="INFO" message="get:\index\status:hackathonProject-config" />

@@ -30,6 +30,12 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+            <groupId>hackathon-meetup-2019</groupId>
+            <artifactId>mule-maven-indexer-connector</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <classifier>mule-plugin</classifier>
+        </dependency>
         <dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-http-connector</artifactId>

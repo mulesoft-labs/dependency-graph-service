@@ -20,7 +20,7 @@ import java.io.IOException;
 public class MavenIndexerConfiguration implements Initialisable, Disposable {
 
   @Parameter
-  private File workingDirectory;
+  private String workingDirectory;
 
   @Parameter
   private RemoteRepository remoteRepository;
@@ -40,7 +40,7 @@ public class MavenIndexerConfiguration implements Initialisable, Disposable {
             .id(this.remoteRepository.getId())
             .build();
     this.mavenIndexer = createIndexer(newMuleMavenIndexerConfigurationBuilder()
-            .workingDirectory(workingDirectory)
+            .workingDirectory(new File(workingDirectory))
             .remoteRepository(remoteRepository)
             .build());
   }
