@@ -15,8 +15,8 @@ types:
         200:
           body:
             application/json:
-              type:
-              example:
+              type: !include statusSchema.schema
+              example: !include statusExample.json
   /search:
     get:
       queryParameters:
@@ -31,4 +31,16 @@ types:
             application/json:
               type: searchSchema
               example: !include searchExample.json
+  /artifact:
+    get:
+      queryParameters:
+        id:
+          type: number
+      responses:
+        200:
+          body:
+            application/json:
+              ##type: !include artifactSchema.schema
+              example: !include artifactExample.json
+          
   
