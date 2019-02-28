@@ -43,11 +43,11 @@ public class MavenIndexerConfiguration implements Initialisable, Disposable {
     try {
       remoteRepository = remoteRepositoryBuilder
               .id(this.remoteRepository.getId())
-              .url(new URL("http://google.com"))
+              .url(new URL(this.remoteRepository.getUrl()))
               .build();
     }
     catch (MalformedURLException e) {
-      throw new InitialisationException(I18nMessageFactory.createStaticMessage("Internal error"), e, this);
+      throw new InitialisationException(I18nMessageFactory.createStaticMessage("Internal error while creating URL for repository"), e, this);
     }
     this.mavenIndexer = createIndexer(newMuleMavenIndexerConfigurationBuilder()
             .workingDirectory(new File(workingDirectory))
