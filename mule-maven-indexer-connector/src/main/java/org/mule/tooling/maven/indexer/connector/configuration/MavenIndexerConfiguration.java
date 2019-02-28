@@ -3,6 +3,7 @@ package org.mule.tooling.maven.indexer.connector.configuration;
 import static org.mule.maven.client.api.model.Authentication.newAuthenticationBuilder;
 import static org.mule.tooling.maven.indexer.MuleMavenIndexerConfiguration.newMuleMavenIndexerConfigurationBuilder;
 import static org.mule.tooling.maven.indexer.MuleMavenIndexerFactory.createIndexer;
+import org.mule.runtime.api.i18n.I18nMessageFactory;
 import org.mule.runtime.api.lifecycle.Disposable;
 import org.mule.runtime.api.lifecycle.Initialisable;
 import org.mule.runtime.api.lifecycle.InitialisationException;
@@ -15,6 +16,8 @@ import org.mule.tooling.maven.indexer.connector.operation.Search;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Operations({Search.class, Flush.class})
 public class MavenIndexerConfiguration implements Initialisable, Disposable {
@@ -36,9 +39,16 @@ public class MavenIndexerConfiguration implements Initialisable, Disposable {
               .password(remoteRepository.getPassword())
                                                      .build());
     }
-    org.mule.maven.client.api.model.RemoteRepository remoteRepository = remoteRepositoryBuilder
-            .id(this.remoteRepository.getId())
-            .build();
+    org.mule.maven.client.api.model.RemoteRepository remoteRepository = null;
+    try {
+      remoteRepository = remoteRepositoryBuilder
+              .id(this.remoteRepository.getId())
+              .url(new URL("http://mock"))
+              .build();
+    }
+    catch (MalformedURLException e) {
+      throw new InitialisationException(I18nMessageFactory.createStaticMessage("Internal error"), e, this);
+    }
     this.mavenIndexer = createIndexer(newMuleMavenIndexerConfigurationBuilder()
             .workingDirectory(new File(workingDirectory))
             .remoteRepository(remoteRepository)
