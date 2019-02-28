@@ -43,7 +43,7 @@ public class MavenIndexerConfiguration implements Initialisable, Disposable {
     try {
       remoteRepository = remoteRepositoryBuilder
               .id(this.remoteRepository.getId())
-              .url(new URL("http://mock"))
+              .url(new URL("http://google.com"))
               .build();
     }
     catch (MalformedURLException e) {
