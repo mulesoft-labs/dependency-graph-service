@@ -1,0 +1,101 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://org.maven.tools.com/root.json",
+  "type": "object",
+  "title": "The Root Schema",
+  "required": [
+    "objects",
+    "total",
+    "time"
+  ],
+  "properties": {
+    "objects": {
+      "$id": "#/properties/objects",
+      "type": "array",
+      "title": "The Objects Schema",
+      "items": {
+        "$id": "#/properties/objects/items",
+        "type": "object",
+        "title": "The Items Schema",
+        "required": [
+          "package"
+        ],
+        "properties": {
+          "package": {
+            "$id": "#/properties/objects/items/properties/package",
+            "type": "object",
+            "title": "The Package Schema",
+            "required": [
+              "name",
+              "version",
+              "description",
+              "date"
+            ],
+            "properties": {
+              "name": {
+                "$id": "#/properties/objects/items/properties/package/properties/name",
+                "type": "string",
+                "title": "The Name Schema",
+                "default": "",
+                "examples": [
+                  "org.mule.runtime:mule-api"
+                ],
+                "pattern": "^(.*)$"
+              },
+              "version": {
+                "$id": "#/properties/objects/items/properties/package/properties/version",
+                "type": "string",
+                "title": "The Version Schema",
+                "default": "",
+                "examples": [
+                  "1.1.0"
+                ],
+                "pattern": "^(.*)$"
+              },
+              "description": {
+                "$id": "#/properties/objects/items/properties/package/properties/description",
+                "type": "string",
+                "title": "The Description Schema",
+                "default": "",
+                "examples": [
+                  "ar - Read Unix archive files."
+                ],
+                "pattern": "^(.*)$"
+              },
+              "date": {
+                "$id": "#/properties/objects/items/properties/package/properties/date",
+                "type": "string",
+                "title": "The Date Schema",
+                "default": "",
+                "examples": [
+                  "2013-12-19T02:43:12.950Z"
+                ],
+                "pattern": "^(.*)$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "total": {
+      "$id": "#/properties/total",
+      "type": "integer",
+      "title": "The Total Schema",
+      "default": 0,
+      "examples": [
+        2
+      ]
+    },
+    "time": {
+      "$id": "#/properties/time",
+      "type": "string",
+      "title": "The Time Schema",
+      "default": "",
+      "examples": [
+        "Thu Feb 28 2019 17:03:26 GMT+0000 (UTC)"
+      ],
+      "pattern": "^(.*)$"
+    }
+  }
+}
