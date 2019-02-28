@@ -7,6 +7,7 @@
     <groupId>hackathon-meetup-2019</groupId>
     <artifactId>mule-dependency-graph</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -15,6 +16,8 @@
 
     <modules>
         <module>mule-dependency-graph-service</module>
+        <module>mule-maven-indexer</module>
+        <module>mule-maven-indexer-connector</module>
     </modules>
 
 </project>
