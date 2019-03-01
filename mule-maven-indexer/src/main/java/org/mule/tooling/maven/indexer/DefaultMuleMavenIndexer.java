@@ -236,7 +236,7 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
         query.add(indexer.constructQuery(MAVEN.CLASSIFIER, new SourcedSearchExpression(Field.NOT_PRESENT)),
                   Occur.MUST_NOT);
 
-        ImmutableSet<Field> fields = ImmutableSet.<Field>builder().add(MAVEN.REPOSITORY_ID, MAVEN.GROUP_ID, MAVEN.ARTIFACT_ID, MAVEN.VERSION).build();
+        ImmutableSet<Field> fields = ImmutableSet.<Field>builder().add(MAVEN.GROUP_ID, MAVEN.ARTIFACT_ID, MAVEN.VERSION).build();
         new UniqueArtifactFilterPostprocessor(fields);
 
         Set<ArtifactDescriptor> results = new HashSet<>();
