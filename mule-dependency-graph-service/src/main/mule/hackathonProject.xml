@@ -12,11 +12,15 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<flow name="hackathonProject-main">
         <http:listener config-ref="hackathonProject-httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[output application/java
+---
+{
+	'access-control-allow-headers' : 'X-Requested-With',
+	'access-control-allow-origin' : '*'
+}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
             </http:error-response>
         </http:listener>
         <apikit:router config-ref="hackathonProject-config" />
