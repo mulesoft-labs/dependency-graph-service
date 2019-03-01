@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ResolveDependencies {
 
-  public List<Artifact> search(String groupId, String artifactId, String version,
+  public List<Artifact> resolveDependencies(String groupId, String artifactId, String version,
                                @Config MavenIndexerConfiguration configuration) {
     return configuration.getMavenIndexer().resolveDependencies(groupId, artifactId, version).stream()
             .map(artifactIndexResult -> new Artifact(artifactIndexResult.getRepository(),
