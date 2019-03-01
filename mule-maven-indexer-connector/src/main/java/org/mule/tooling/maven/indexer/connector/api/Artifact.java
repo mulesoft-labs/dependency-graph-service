@@ -1,6 +1,6 @@
 package org.mule.tooling.maven.indexer.connector.api;
 
-public class ArtifactResultIndex {
+public class Artifact {
 
   private String groupId;
   private String artifactId;
@@ -10,11 +10,11 @@ public class ArtifactResultIndex {
 
   private String repository;
 
-  public ArtifactResultIndex() {
+  public Artifact() {
     // no op
   }
 
-  public ArtifactResultIndex(String repository, String groupId, String artifactId, String classifier, String extension, String version) {
+  public Artifact(String repository, String groupId, String artifactId, String classifier, String extension, String version) {
     this.repository = repository;
 
     this.groupId = groupId;

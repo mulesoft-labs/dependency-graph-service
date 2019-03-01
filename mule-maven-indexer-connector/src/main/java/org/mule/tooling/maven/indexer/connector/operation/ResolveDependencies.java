@@ -7,11 +7,11 @@ import org.mule.tooling.maven.indexer.connector.configuration.MavenIndexerConfig
 
 import java.util.List;
 
-public class Search {
+public class ResolveDependencies {
 
-  public List<Artifact> search(String artifactId,
-                               long size, @Config MavenIndexerConfiguration configuration) {
-    return configuration.getMavenIndexer().search(artifactId, size).stream()
+  public List<Artifact> search(String groupId, String artifactId, String version,
+                               @Config MavenIndexerConfiguration configuration) {
+    return configuration.getMavenIndexer().resolveDependencies(groupId, artifactId, version).stream()
             .map(artifactIndexResult -> new Artifact(artifactIndexResult.getRepository(),
                                                      artifactIndexResult.getGroupId(),
                                                      artifactIndexResult.getArtifactId(),

@@ -1,10 +1,10 @@
 package org.mule.tooling.maven.indexer.model;
 
-import org.mule.tooling.maven.indexer.ArtifactIndexResult;
+import org.mule.tooling.maven.indexer.ArtifactDescriptor;
 
 import java.io.Serializable;
 
-public class DefaultArtifactIndexResult implements ArtifactIndexResult, Serializable {
+public class DefaultArtifactDescriptor implements ArtifactDescriptor, Serializable {
 
   private String groupId;
   private String artifactId;
@@ -14,11 +14,11 @@ public class DefaultArtifactIndexResult implements ArtifactIndexResult, Serializ
 
   private String repository;
 
-  public DefaultArtifactIndexResult() {
+  public DefaultArtifactDescriptor() {
     // no op
   }
 
-  public DefaultArtifactIndexResult(String repository, String groupId, String artifactId, String classifier, String extension, String version) {
+  public DefaultArtifactDescriptor(String repository, String groupId, String artifactId, String classifier, String extension, String version) {
     this.repository = repository;
 
     this.groupId = groupId;
@@ -67,7 +67,7 @@ public class DefaultArtifactIndexResult implements ArtifactIndexResult, Serializ
       return false;
     }
 
-    DefaultArtifactIndexResult that = (DefaultArtifactIndexResult) o;
+    DefaultArtifactDescriptor that = (DefaultArtifactDescriptor) o;
 
     if (!groupId.equals(that.groupId)) {
       return false;

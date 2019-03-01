@@ -39,7 +39,7 @@ public class MavenIndexerConfiguration implements Initialisable, Disposable {
               .password(remoteRepository.getPassword())
                                                      .build());
     }
-    org.mule.maven.client.api.model.RemoteRepository remoteRepository = null;
+    org.mule.maven.client.api.model.RemoteRepository remoteRepository;
     try {
       remoteRepository = remoteRepositoryBuilder
               .id(this.remoteRepository.getId())

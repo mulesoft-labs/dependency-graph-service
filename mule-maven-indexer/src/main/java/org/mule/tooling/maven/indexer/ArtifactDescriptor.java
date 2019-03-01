@@ -1,6 +1,6 @@
 package org.mule.tooling.maven.indexer;
 
-public interface ArtifactIndexResult {
+public interface ArtifactDescriptor {
 
   String getGroupId();
 

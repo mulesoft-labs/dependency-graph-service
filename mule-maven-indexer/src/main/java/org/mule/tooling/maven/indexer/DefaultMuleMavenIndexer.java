@@ -21,11 +21,16 @@ package org.mule.tooling.maven.indexer;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import org.mule.maven.client.api.MavenClient;
+import org.mule.maven.client.api.MavenClientProvider;
+import org.mule.maven.client.api.model.BundleDescriptor;
+import org.mule.maven.client.api.model.MavenConfiguration;
 import org.mule.maven.client.api.model.RemoteRepository;
-import org.mule.tooling.maven.indexer.model.DefaultArtifactIndexResult;
+import org.mule.tooling.maven.indexer.model.DefaultArtifactDescriptor;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -33,8 +38,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
@@ -54,6 +61,7 @@ import org.apache.maven.index.updater.IndexUpdateResult;
 import org.apache.maven.index.updater.IndexUpdater;
 import org.apache.maven.index.updater.ResourceFetcher;
 import org.apache.maven.index.updater.WagonHelper;
+import org.apache.maven.model.Model;
 import org.apache.maven.wagon.Wagon;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 import org.apache.maven.wagon.events.TransferEvent;
@@ -72,8 +80,12 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
     private final IndexUpdater indexUpdater;
     private final Wagon httpWagon;
 
+    private MuleMavenIndexerConfiguration configuration;
+
     private Map<String, IndexResource> indexResourcesByServerId = new HashMap<>();
     private Map<String, IndexingContext> indexingContextsByServerId = new HashMap<>();
+
+    private MavenClient mavenClient;
 
     public DefaultMuleMavenIndexer(MuleMavenIndexerConfiguration configuration) {
         try {
@@ -86,6 +98,8 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
             this.indexUpdater = plexusContainer.lookup(IndexUpdater.class);
             // lookup wagon used to remotely fetch index
             this.httpWagon = plexusContainer.lookup(Wagon.class, "http");
+
+            this.configuration = configuration;
 
             init(configuration);
         } catch (Exception e) {
@@ -183,10 +197,27 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
             System.out.println();
 
         }
+
+
+        MavenConfiguration.MavenConfigurationBuilder mavenConfigurationBuilder = MavenConfiguration.newMavenConfigurationBuilder();
+        configuration.remoteRepositories().forEach(remoteRepository -> mavenConfigurationBuilder.remoteRepository(remoteRepository));
+        this.mavenClient = MavenClientProvider.discoverProvider(this.getClass().getClassLoader()).createMavenClient(mavenConfigurationBuilder
+                .localMavenRepositoryLocation(new File(configuration.workingDirectory(), "local"))
+                                                                                                                            .build());
     }
 
     @Override
-    public List<ArtifactIndexResult> search(String artifactId) {
+    public void flush() {
+        try {
+            FileUtils.cleanDirectory(configuration.workingDirectory());
+        }
+        catch (IOException e) {
+            throw new UncheckedIOException("Error while flushing indexes and local repository", e);
+        }
+    }
+
+    @Override
+    public List<ArtifactDescriptor>  search(String artifactId, long size) {
         final Query artifactIdQ =
                 indexer.constructQuery(MAVEN.ARTIFACT_ID, new UserInputSearchExpression(artifactId));
         final BooleanQuery query = new BooleanQuery();
@@ -199,14 +230,14 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
         query.add(indexer.constructQuery(MAVEN.CLASSIFIER, new SourcedSearchExpression(Field.NOT_PRESENT)),
                   Occur.MUST_NOT);
 
-        Set<ArtifactIndexResult> results = new HashSet<>();
+        Set<ArtifactDescriptor> results = new HashSet<>();
         for (IndexingContext indexingContext : indexingContextsByServerId.values()) {
             try {
                 System.out.println(format("Searching for all GAVs with A=%s on index: %s", artifactId, indexingContext.getId()));
                 final IteratorSearchRequest request =
                         new IteratorSearchRequest(query, Collections.singletonList(indexingContext));
                 final IteratorSearchResponse response = indexer.searchIterator(request);
-                results.addAll(transform(response.iterator()));
+                transformAndAppend(results, response.iterator(), size);
                 response.close();
             } catch (Exception e) {
                 throw new RuntimeException("Error while searching data in index", e);
@@ -216,18 +247,34 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
         return results.stream().collect(toList());
     }
 
-    private Set<ArtifactIndexResult> transform(IteratorResultSet iterator) {
-        Set<ArtifactIndexResult> results = new HashSet<>();
+    private void transformAndAppend(Set<ArtifactDescriptor> results, IteratorResultSet iterator, long size) {
         while (iterator.hasNext()) {
             ArtifactInfo artifactInfo = iterator.next();
-            results.add(new DefaultArtifactIndexResult(artifactInfo.getRepository(),
-                                                       artifactInfo.getGroupId(),
-                                                       artifactInfo.getArtifactId(),
-                                                       artifactInfo.getClassifier(),
-                                                       artifactInfo.getFileExtension(),
-                                                       artifactInfo.getVersion()));
+            results.add(new DefaultArtifactDescriptor(artifactInfo.getRepository(),
+                                                      artifactInfo.getGroupId(),
+                                                      artifactInfo.getArtifactId(),
+                                                      artifactInfo.getClassifier(),
+                                                      artifactInfo.getFileExtension(),
+                                                      artifactInfo.getVersion()));
+            if (results.size() >= size) {
+                break;
+            }
         }
-        return results;
+    }
+
+    @Override
+    public List<ArtifactDescriptor> resolveDependencies(String groupId, String artifactId, String version) {
+        Model effectiveModel = mavenClient.getEffectiveModel(new File(mavenClient.resolveBundleDescriptor(new BundleDescriptor.Builder()
+                                                                                                       .setGroupId(groupId).setArtifactId(artifactId).setVersion(version).setType("pom")
+                                                                                                       .build()).getBundleUri()), Optional.empty());
+        return effectiveModel.getDependencies().stream()
+                .map(dependency -> new DefaultArtifactDescriptor(null,
+                                                                 dependency.getGroupId(),
+                                                                 dependency.getArtifactId(),
+                                                                 dependency.getClassifier(),
+                                                                 dependency.getType(),
+                                                                 dependency.getVersion()))
+                .collect(toList());
     }
 
     @Override
