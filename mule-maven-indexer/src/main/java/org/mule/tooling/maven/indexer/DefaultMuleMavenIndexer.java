@@ -21,12 +21,17 @@ package org.mule.tooling.maven.indexer;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
+import static org.apache.maven.index.ArtifactInfo.ARTIFACT_ID;
+import static org.apache.maven.index.ArtifactInfo.GROUP_ID;
+import static org.apache.maven.index.ArtifactInfo.VERSION;
 import org.mule.maven.client.api.MavenClient;
 import org.mule.maven.client.api.MavenClientProvider;
 import org.mule.maven.client.api.model.BundleDescriptor;
 import org.mule.maven.client.api.model.MavenConfiguration;
 import org.mule.maven.client.api.model.RemoteRepository;
 import org.mule.tooling.maven.indexer.model.DefaultArtifactDescriptor;
+
+import com.google.common.collect.ImmutableSet;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +57,7 @@ import org.apache.maven.index.IteratorResultSet;
 import org.apache.maven.index.IteratorSearchRequest;
 import org.apache.maven.index.IteratorSearchResponse;
 import org.apache.maven.index.MAVEN;
+import org.apache.maven.index.UniqueArtifactFilterPostprocessor;
 import org.apache.maven.index.context.IndexCreator;
 import org.apache.maven.index.context.IndexingContext;
 import org.apache.maven.index.expr.SourcedSearchExpression;
@@ -229,6 +235,9 @@ public class DefaultMuleMavenIndexer implements MuleMavenIndexer {
         // Note: this below is unfinished API, needs fixing
         query.add(indexer.constructQuery(MAVEN.CLASSIFIER, new SourcedSearchExpression(Field.NOT_PRESENT)),
                   Occur.MUST_NOT);
+
+        ImmutableSet<Field> fields = ImmutableSet.<Field>builder().add(MAVEN.REPOSITORY_ID, MAVEN.GROUP_ID, MAVEN.ARTIFACT_ID, MAVEN.VERSION).build();
+        new UniqueArtifactFilterPostprocessor(fields);
 
         Set<ArtifactDescriptor> results = new HashSet<>();
         for (IndexingContext indexingContext : indexingContextsByServerId.values()) {
