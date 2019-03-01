@@ -12,6 +12,7 @@ import org.mule.runtime.extension.api.annotation.param.Parameter;
 import org.mule.tooling.maven.indexer.MuleMavenIndexer;
 import org.mule.tooling.maven.indexer.connector.api.RemoteRepository;
 import org.mule.tooling.maven.indexer.connector.operation.Flush;
+import org.mule.tooling.maven.indexer.connector.operation.ResolveDependencies;
 import org.mule.tooling.maven.indexer.connector.operation.Search;
 
 import java.io.File;
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-@Operations({Search.class, Flush.class})
+@Operations({Search.class, Flush.class, ResolveDependencies.class})
 public class MavenIndexerConfiguration implements Initialisable, Disposable {
 
   @Parameter
