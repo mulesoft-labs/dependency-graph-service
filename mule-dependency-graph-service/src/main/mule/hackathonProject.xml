@@ -177,16 +177,14 @@ output application/json
 ---
 {
 	name: (payload.groupId default "") ++ ":" ++ (payload.artifactId default ""),
+	"dist-tags": {
+		latest: payload.version default ""
+	},
 	versions: {
 		(payload.version): {
-			dependencies :
-            (
-                vars.resolvedDependencies map ((artifact, index) ->
-                    (
-                    (artifact.version): artifact.groupId ++ ":" ++ artifact.artifactId
-                    )
-                )
-            )
+			dependencies : (vars.resolvedDependencies map( artifact , index ) ->
+                    (artifact.groupId ++ ":" ++ artifact.artifactId): (artifact.version)
+                ) reduce ((env, obj={}) -> obj ++ env)
 		}
 	}
 }
