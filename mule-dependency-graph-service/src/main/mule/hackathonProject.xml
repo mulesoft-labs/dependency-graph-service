@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns:mmi="http://www.mulesoft.org/schema/mule/mmi" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
-http://www.mulesoft.org/schema/mule/mmi http://www.mulesoft.org/schema/mule/mmi/current/mule-mmi.xsd">
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:mmi="http://www.mulesoft.org/schema/mule/mmi" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/mmi http://www.mulesoft.org/schema/mule/mmi/current/mule-mmi.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <http:listener-config name="hackathonProject-httpListenerConfig">
         <http:listener-connection host="0.0.0.0" port="8081" />
     </http:listener-config>
@@ -129,6 +130,23 @@ output application/json
     </flow>
     <flow name="get:\index\search:hackathonProject-config">
 		<mmi:search doc:name="Search" doc:id="64647088-0e6a-420a-bd16-6518eec18318" config-ref="Mule_Maven_Indexer_Config" artifactId="#[attributes.queryParams.text]"/>
+		<ee:transform doc:name="Transform Message" doc:id="f3e88f09-fbf9-4010-afcf-2402430efa9e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	objects: payload map ( payload01 , indexOfPayload01 ) -> {
+		package: {
+			name: payload01.artifactId default "",
+			version: payload01.version default "",
+			description: payload01.repository default "",
+			date: ""
+		}
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
     </flow>
     <flow name="get:\index\status:hackathonProject-config">
         <logger level="INFO" message="get:\index\status:hackathonProject-config" />
